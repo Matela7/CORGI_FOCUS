@@ -32,6 +32,7 @@ def home():
 def page_not_found(error):
     return redirect("http://localhost:8501")  # Przekierowanie na stronę główną Streamlit
 
+# fixme: zrobić error handling
 
 def block_sites(hosts_path, sites_to_block, redirect_ip):
     with open(hosts_path, 'r+') as file:

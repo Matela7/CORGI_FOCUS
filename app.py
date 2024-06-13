@@ -11,6 +11,7 @@ with col1:
     st.write("Who controls the present controls the past.")
     st.write("War is peace.")
     st.write("Freedom is slavery.")
+    st.write("Ignorance is strength.")
 with col2:
     st.image("1.jpg", use_column_width=True, )
 
