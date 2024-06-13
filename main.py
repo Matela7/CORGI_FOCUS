@@ -1,3 +1,5 @@
+import multiprocessing
+import os
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
@@ -8,6 +10,7 @@ from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
 from functools import partial
+from flask import Flask, redirect
 
 # TO DO:
 # ZROBIC BACKUP KURWA
@@ -17,6 +20,18 @@ sites_to_block = ["facebook.com", "www.facebook.com", "instagram.com", "www.inst
 hosts_path = r"C:\Windows\System32\drivers\etc\hosts"  # Windows
 # hosts_path = "/etc/hosts"  # MacOS/Linux
 redirect_ip = "127.0.0.1"
+
+# Flask app 
+flask_app = Flask(__name__)
+
+@flask_app.route('/')
+def home():
+    return redirect("http://localhost:8501")  # Port Streamlit
+
+@flask_app.errorhandler(404)
+def page_not_found(error):
+    return redirect("http://localhost:8501")  # Przekierowanie na stronę główną Streamlit
+
 
 def block_sites(hosts_path, sites_to_block, redirect_ip):
     with open(hosts_path, 'r+') as file:
@@ -121,5 +136,26 @@ class MyApp(App):
         screen_manager.add_widget(SecondScreen(name='second'))
         return screen_manager
 
+def run_flask():
+    flask_app.run(port=8501, debug=True)
+
+def run_streamlit():
+    os.system("streamlit run app.py")
+
 if __name__ == '__main__':
+    # Tworzenie procesów
+    flask_process = multiprocessing.Process(target=run_flask)
+    streamlit_process = multiprocessing.Process(target=run_streamlit)
+
+    # Uruchomienie procesów
+    flask_process.start()
+    streamlit_process.start()
+
+    # Uruchomienie aplikacji Kivy
     MyApp().run()
+
+    # Oczekiwanie na zakończenie procesów
+    flask_process.join()
+    streamlit_process.join()
+
+
