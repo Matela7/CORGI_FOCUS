@@ -9,8 +9,10 @@ from kivy.uix.button import Button
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.widget import Widget
+from kivy.uix.popup import Popup
 from functools import partial
 from flask import Flask, redirect
+
 
 # TO DO:
 # ZROBIC BACKUP KURWA
@@ -32,7 +34,23 @@ def home():
 def page_not_found(error):
     return redirect("http://localhost:8501")  # Przekierowanie na stronę główną Streamlit
 
-# fixme: zrobić error handling
+# Funkcja wyświetlająca popup z błędem
+def error_popup(number):
+    if number == 0:
+        popup1 = Popup(title='ERROR CORGI IS ANGRY',
+            content=Label(text='You have to run this program as an administrator \n to block websites!'),
+            size_hint=(None, None), size=(400, 400))
+        popup1.open()
+    elif number == 1:
+        popup2 = Popup(title='ERROR CORGI IS ANGRY',
+            content=Label(text='You have to run this program as an administrator \n to unblock websites!'),
+            size_hint=(None, None), size=(400, 400))
+        popup2.open()
+    else:
+        popup3 = Popup(title='ERROR CORGI IS ANGRY',
+            content=Label(text='Something went wrong!'),
+            size_hint=(None, None), size=(400, 400))
+        popup3.open()
 
 def block_sites(hosts_path, sites_to_block, redirect_ip):
     try:
@@ -44,6 +62,7 @@ def block_sites(hosts_path, sites_to_block, redirect_ip):
         print("Strony zablokowane.")
     except PermissionError:
         print(f"Brak uprawnień do zapisu w pliku hosts. Uruchom program jako administrator. {PermissionError}")
+        error_popup(0)
 def unblock_sites(hosts_path, sites_to_block, redirect_ip):
     try:
         with open(hosts_path, 'r+') as file:
@@ -56,7 +75,7 @@ def unblock_sites(hosts_path, sites_to_block, redirect_ip):
         print("Strony odblokowane.")
     except PermissionError:
         print(f"Brak uprawnień do zapisu w pliku hosts. Uruchom program jako administrator. {PermissionError}")
-
+        error_popup(1)
 # Główna strona
 class FirstScreen(Screen):
     def __init__(self, **kwargs):
