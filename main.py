@@ -35,22 +35,27 @@ def page_not_found(error):
 # fixme: zrobić error handling
 
 def block_sites(hosts_path, sites_to_block, redirect_ip):
-    with open(hosts_path, 'r+') as file:
-        hosts = file.read()
-        for site in sites_to_block:
-            if site not in hosts:
-                file.write(redirect_ip + " " + site + "\n")
-    print("Strony zablokowane.")
-
+    try:
+        with open(hosts_path, 'r+') as file:
+            hosts = file.read()
+            for site in sites_to_block:
+                if site not in hosts:
+                    file.write(redirect_ip + " " + site + "\n")
+        print("Strony zablokowane.")
+    except PermissionError:
+        print(f"Brak uprawnień do zapisu w pliku hosts. Uruchom program jako administrator. {PermissionError}")
 def unblock_sites(hosts_path, sites_to_block, redirect_ip):
-    with open(hosts_path, 'r+') as file:
-        lines = file.readlines()
-        file.seek(0)
-        for line in lines:
-            if not any(site in line for site in sites_to_block):
-                file.write(line)
-        file.truncate()
-    print("Strony odblokowane.")
+    try:
+        with open(hosts_path, 'r+') as file:
+            lines = file.readlines()
+            file.seek(0)
+            for line in lines:
+                if not any(site in line for site in sites_to_block):
+                    file.write(line)
+            file.truncate()
+        print("Strony odblokowane.")
+    except PermissionError:
+        print(f"Brak uprawnień do zapisu w pliku hosts. Uruchom program jako administrator. {PermissionError}")
 
 # Główna strona
 class FirstScreen(Screen):
