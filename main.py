@@ -15,10 +15,10 @@ from flask import Flask, redirect
 
 
 # TO DO:
-# ZROBIC BACKUP KURWA
-# bo rozwalimy ludziom systemy jak cos sie zjebie xD 
+# ZROBIC BACKUP 
+# bo rozwalimy ludziom systemy jak cos sie ... xD 
 
-sites_to_block = ["facebook.com", "www.facebook.com", "instagram.com", "www.instagram.com", "youtube.com", "www.youtube.com"]
+sites_to_block = ["facebook.com", "www.facebook.com", "instagram.com", "www.instagram.com", "linkedin.com", "www.linkedin.com", "youtube.com", "www.youtube.com"] 
 hosts_path = r"C:\Windows\System32\drivers\etc\hosts"  # Windows
 # hosts_path = "/etc/hosts"  # MacOS/Linux
 redirect_ip = "127.0.0.1"
@@ -80,13 +80,20 @@ def unblock_sites(hosts_path, sites_to_block, redirect_ip):
 class FirstScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical')
+        layout = BoxLayout(orientation='vertical', padding = 50, spacing = 5)
 
         text = Label(text="CORGI FOCUS", font_size='30sp', size_hint=(1, 0.2))
         layout.add_widget(text) # główny napis
 
         horizontal_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.5))
-        text2 = Label(text="Stop procastination with CORGI!\nTurn on focus mode to BLOCK addicting websites\nto add websites or delete them, turn second page,\nin case to stop blocking websites, just click again", font_size='25sp', size_hint=(0.5, 1), halign='left', valign='middle')
+
+        text2 = Label(text="Stop procastination with CORGI!\nTurn on focus mode to BLOCK addicting websites\nto add websites or delete them, turn second page,\nin case to stop blocking websites, just click again", 
+                      font_size='25sp', 
+                      size_hint=(0.5, 1), 
+                      halign='left', 
+                      valign='middle', 
+                      text_size=(None, None))
+        text2.bind(size=text2.setter('text_size'))
         horizontal_layout.add_widget(text2) # tekst numer 1
 
         image = Image(source='korki.gif', size_hint=(0.5, 1))
@@ -163,6 +170,7 @@ class MyApp(App):
 
 def run_flask():
     flask_app.run(port=8501, debug=True)
+    # debug=False, threaded=True) ?
 
 def run_streamlit():
     os.system("streamlit run app.py")
