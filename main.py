@@ -167,6 +167,16 @@ class MyApp(App):
         screen_manager.add_widget(FirstScreen(name='first'))
         screen_manager.add_widget(SecondScreen(name='second'))
         return screen_manager
+    
+    def on_request_close(self, *args):
+        unblock_sites(hosts_path, sites_to_block, redirect_ip)
+        return False
+    
+    def on_stop(self):
+        flask_process.terminate()
+        streamlit_process.terminate()
+        flask_process.join()
+        streamlit_process.join()
 
 def run_flask():
     flask_app.run(port=8501, debug=True)
@@ -176,19 +186,18 @@ def run_streamlit():
     os.system("streamlit run app.py")
 
 if __name__ == '__main__':
-    # Tworzenie procesów
     flask_process = multiprocessing.Process(target=run_flask)
     streamlit_process = multiprocessing.Process(target=run_streamlit)
-
-    # Uruchomienie procesów
     flask_process.start()
     streamlit_process.start()
 
-    # Uruchomienie aplikacji Kivy
-    MyApp().run()
-
-    # Oczekiwanie na zakończenie procesów
-    flask_process.join()
-    streamlit_process.join()
+    try:
+        MyApp().run()
+    finally:
+        # w razie co zamykamy procesy, ale powinny byc zamkniete przez on_stop
+        flask_process.terminate()
+        streamlit_process.terminate()
+        flask_process.join()
+        streamlit_process.join()
 
 
