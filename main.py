@@ -1,5 +1,6 @@
 import multiprocessing
 import os
+import atexit
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
@@ -92,7 +93,7 @@ class FirstScreen(Screen):
                       size_hint=(0.5, 1), 
                       halign='left', 
                       valign='middle', 
-                      text_size=(None, None))
+                      )
         text2.bind(size=text2.setter('text_size'))
         horizontal_layout.add_widget(text2) # tekst numer 1
 
@@ -101,21 +102,21 @@ class FirstScreen(Screen):
         layout.add_widget(horizontal_layout)
 
         buttons_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.2))
-        button_block = Button(text="BLOCK", font_size='20sp', size_hint=(0.1, 0.5))
+        button_block = Button(text="BLOCK", font_size='20sp', size_hint=(0.3, 0.5))
         button_block.bind(on_press=partial(self.on_block_button_press))
         buttons_layout.add_widget(button_block) # przycisk blokujacy
 
         spacer1 = Widget(size_hint=(0.1, 1))
         buttons_layout.add_widget(spacer1)
 
-        button_unblock = Button(text="UNBLOCK", font_size='20sp', size_hint=(0.1, 0.5))
+        button_unblock = Button(text="UNBLOCK", font_size='20sp', size_hint=(0.3, 0.5))
         button_unblock.bind(on_press=partial(self.on_unblock_button_press))
         buttons_layout.add_widget(button_unblock) # przycisk odblokowujacy
 
         spacer2 = Widget(size_hint=(0.1, 1))
         buttons_layout.add_widget(spacer2)
 
-        button_next = Button(text="Next", font_size='20sp', size_hint=(0.1, 0.5))
+        button_next = Button(text="Next", font_size='20sp', size_hint=(0.3, 0.5))
         button_next.bind(on_press=self.on_next_button_press)
         buttons_layout.add_widget(button_next) # przycisk przechodzacy do drugiej strony
         layout.add_widget(buttons_layout)
@@ -173,17 +174,24 @@ class MyApp(App):
         return False
     
     def on_stop(self):
-        flask_process.terminate()
-        streamlit_process.terminate()
-        flask_process.join()
-        streamlit_process.join()
-
+        close_processes()
+        unblock_sites(hosts_path, sites_to_block, redirect_ip)
+        return False
 def run_flask():
     flask_app.run(port=8501, debug=True)
     # debug=False, threaded=True) ?
 
 def run_streamlit():
     os.system("streamlit run app.py")
+
+def close_processes():
+    for process in [flask_process, streamlit_process]:
+        if process.is_alive():
+            process.terminate()
+            process.join()
+    return False
+
+atexit.register(close_processes)
 
 if __name__ == '__main__':
     flask_process = multiprocessing.Process(target=run_flask)
@@ -195,9 +203,6 @@ if __name__ == '__main__':
         MyApp().run()
     finally:
         # w razie co zamykamy procesy, ale powinny byc zamkniete przez on_stop
-        flask_process.terminate()
-        streamlit_process.terminate()
-        flask_process.join()
-        streamlit_process.join()
+        close_processes()
 
 
