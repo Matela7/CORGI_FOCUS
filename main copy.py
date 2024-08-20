@@ -23,6 +23,7 @@ from kivy.graphics import Color, Rectangle  # Import do rysowania tła
 from kivy.graphics import Color, Ellipse  # Import do rysowania kółka
 from kivy.core.audio import SoundLoader
 from functools import partial
+from kivy.uix.textinput import TextInput
 import win32gui
 # TO DO:
 # ZROBIC BACKUP 
@@ -243,28 +244,68 @@ class FirstScreen(Screen):
 class SecondScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical')
+        self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
 
+        # Kolor tła
+        with self.layout.canvas.before:
+            Color(0.647, 0.216, 0.992, 1)  # Kolor RGB
+            self.rect = Rectangle(size=self.size, pos=self.pos)
+            self.layout.bind(size=self._update_rect, pos=self._update_rect)
+
+        # Nagłówek
         text = Label(text="Manage Websites", font_size='30sp', size_hint=(1, 0.1))
-        layout.add_widget(text)
+        self.layout.add_widget(text)
 
-        scrollview = ScrollView(size_hint=(1, 0.8))
-        grid = GridLayout(cols=1, size_hint_y=None)
-        grid.bind(minimum_height=grid.setter('height'))
+        # Pole do dodawania nowej strony
+        self.input_box = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
+        self.new_site_input = TextInput(hint_text="Enter website to block", size_hint=(0.8, 1))
+        self.add_button = Button(text="Add", size_hint=(0.2, 1))
+        self.add_button.bind(on_press=self.add_site)
+        self.input_box.add_widget(self.new_site_input)
+        self.input_box.add_widget(self.add_button)
+        self.layout.add_widget(self.input_box)
 
-        for site in sites_to_block:
-            lbl = Label(text=site, font_size='20sp', size_hint_y=None, height=40)
-            grid.add_widget(lbl)
+        # ScrollView do listy stron
+        self.scrollview = ScrollView(size_hint=(1, 0.7))
+        self.grid = GridLayout(cols=2, size_hint_y=None)
+        self.grid.bind(minimum_height=self.grid.setter('height'))
+        self.scrollview.add_widget(self.grid)
+        self.layout.add_widget(self.scrollview)
 
-        scrollview.add_widget(grid)
-        layout.add_widget(scrollview)
+        self.update_site_list()
 
+        # Przycisk powrotu
         button_prev = Button(text="Previous", font_size='20sp', size_hint=(1, 0.1))
         button_prev.bind(on_press=self.on_prev_button_press)
-        layout.add_widget(button_prev)
+        self.layout.add_widget(button_prev)
 
-        self.add_widget(layout)
-        
+        self.add_widget(self.layout)
+
+    def _update_rect(self, instance, value):
+        self.rect.pos = instance.pos
+        self.rect.size = instance.size
+
+    def update_site_list(self):
+        self.grid.clear_widgets()
+        for site in sites_to_block:
+            lbl = Label(text=site, font_size='20sp', size_hint_y=None, height=40)
+            remove_btn = Button(text="Remove", size_hint_y=None, height=40)
+            remove_btn.bind(on_press=partial(self.remove_site, site))
+            self.grid.add_widget(lbl)
+            self.grid.add_widget(remove_btn)
+
+    def add_site(self, instance):
+        new_site = self.new_site_input.text.strip()
+        if new_site and new_site not in sites_to_block:
+            sites_to_block.append(new_site)
+            self.new_site_input.text = ""
+            self.update_site_list()
+
+    def remove_site(self, site, instance):
+        if site in sites_to_block:
+            sites_to_block.remove(site)
+            self.update_site_list()
+
     def on_prev_button_press(self, instance):
         self.manager.current = 'first'
 
@@ -316,3 +357,6 @@ if __name__ == '__main__':
     streamlit_process.start()
 
     MyApp().run()
+ 
+
+
