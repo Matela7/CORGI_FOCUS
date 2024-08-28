@@ -23,7 +23,8 @@ from kivy.graphics import Color, Rectangle  # Import do rysowania tła
 from kivy.graphics import Color, Ellipse  # Import do rysowania kółka
 from kivy.core.audio import SoundLoader
 from functools import partial
-from kivy.uix.textinput import TextInput
+from kivymd.uix.textfield import MDTextField  # Import MDTextField
+from kivymd.app import MDApp  # Importujemy MDApp do aplikacji KivyMD
 import win32gui
 # TO DO:
 # ZROBIC BACKUP 
@@ -49,7 +50,8 @@ def get_active_window_title(sites):
 
 def strip_site(site):
     return site.replace("http://", "").replace("https://", "").replace("www.", "").replace(".com", "").split("/")[0].lower()
-# Funkcja wyświetlająca popup z błędem
+def run_get_active_window_title(sites):
+    get_active_window_title(sites)
 def error_popup(number):
     if number == 0:
         popup1 = Popup(title='ERROR CORGI IS ANGRY',
@@ -241,78 +243,71 @@ class FirstScreen(Screen):
 
 
 # Druga strona
+from kivymd.uix.button import MDIconButton  # Importujemy przyciski z ikonami
+
 class SecondScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.layout = BoxLayout(orientation='vertical', padding=10, spacing=10)
+        layout = BoxLayout(orientation='vertical', padding=50, spacing=5)
 
-        # Kolor tła
-        with self.layout.canvas.before:
-            Color(0.647, 0.216, 0.992, 1)  # Kolor RGB
+        with layout.canvas.before:
+            Color(0.216, 0.933, 0.992, 1)
             self.rect = Rectangle(size=self.size, pos=self.pos)
-            self.layout.bind(size=self._update_rect, pos=self._update_rect)
+            layout.bind(size=self._update_rect, pos=self._update_rect)
 
-        # Nagłówek
-        text = Label(text="Manage Websites", font_size='30sp', size_hint=(1, 0.1))
-        self.layout.add_widget(text)
+        text = Label(text="CUSTOM BLOCKLIST", font_size='33sp', size_hint=(1, 0.2))
+        layout.add_widget(text)
 
-        # Pole do dodawania nowej strony
-        self.input_box = BoxLayout(orientation='horizontal', size_hint=(1, 0.1))
-        self.new_site_input = TextInput(hint_text="Enter website to block", size_hint=(0.8, 1))
-        self.add_button = Button(text="Add", size_hint=(0.2, 1))
-        self.add_button.bind(on_press=self.add_site)
-        self.input_box.add_widget(self.new_site_input)
-        self.input_box.add_widget(self.add_button)
-        self.layout.add_widget(self.input_box)
+        scrollview = ScrollView(size_hint=(1, 1))
+        layout.add_widget(scrollview)
 
-        # ScrollView do listy stron
-        self.scrollview = ScrollView(size_hint=(1, 0.7))
-        self.grid = GridLayout(cols=2, size_hint_y=None)
-        self.grid.bind(minimum_height=self.grid.setter('height'))
-        self.scrollview.add_widget(self.grid)
-        self.layout.add_widget(self.scrollview)
+        self.gridlayout = GridLayout(cols=2, spacing=10, size_hint_y=None)
+        self.gridlayout.bind(minimum_height=self.gridlayout.setter('height'))
+        scrollview.add_widget(self.gridlayout)
 
+        # Dodanie stron na starcie
         self.update_site_list()
 
-        # Przycisk powrotu
-        button_prev = Button(text="Previous", font_size='20sp', size_hint=(1, 0.1))
-        button_prev.bind(on_press=self.on_prev_button_press)
-        self.layout.add_widget(button_prev)
+        # Przycisk dodawania
+        add_button = Button(text="ADD SITE", size_hint=(1, 0.2))
+        add_button.bind(on_press=self.add_site)
+        layout.add_widget(add_button)
 
-        self.add_widget(self.layout)
+        # Przycisk powrotu
+        prev_button = Button(text="Back to First Screen", size_hint=(1, 0.2))
+        prev_button.bind(on_press=self.on_prev_button_press)
+        layout.add_widget(prev_button)
+
+        self.add_widget(layout)
 
     def _update_rect(self, instance, value):
         self.rect.pos = instance.pos
         self.rect.size = instance.size
 
     def update_site_list(self):
-        self.grid.clear_widgets()
+        self.gridlayout.clear_widgets()
         for site in sites_to_block:
-            lbl = Label(text=site, font_size='20sp', size_hint_y=None, height=40)
-            remove_btn = Button(text="Remove", size_hint_y=None, height=40)
-            remove_btn.bind(on_press=partial(self.remove_site, site))
-            self.grid.add_widget(lbl)
-            self.grid.add_widget(remove_btn)
+            text_input = MDTextField(text=site, font_size='15sp', size_hint=(0.8, None), height=40)
+            self.gridlayout.add_widget(text_input)
+
+            # Przycisk usuwania
+            remove_button = MDIconButton(icon="delete", size_hint=(0.2, None), on_press=partial(self.remove_site, site))
+            self.gridlayout.add_widget(remove_button)
 
     def add_site(self, instance):
-        new_site = self.new_site_input.text.strip()
-        if new_site and new_site not in sites_to_block:
-            sites_to_block.append(new_site)
-            self.new_site_input.text = ""
-            self.update_site_list()
+        sites_to_block.append("")
+        self.update_site_list()
 
     def remove_site(self, site, instance):
         if site in sites_to_block:
             sites_to_block.remove(site)
-            self.update_site_list()
+        self.update_site_list()
 
     def on_prev_button_press(self, instance):
         self.manager.current = 'first'
 
-# Klasa główna, aplikacja
-class MyApp(App):
-    icon = "icon.png" #or icon.ico
-    title = "CORGI FOCUS"
+
+class MyApp(MDApp):  # Używamy MDApp zamiast App
     def build(self):
         self.play_sound_on_startup()
         global main_iterator
@@ -353,10 +348,4 @@ def close_processes():
 #atexit.register(close_processes)
 
 if __name__ == '__main__':
-    streamlit_process = multiprocessing.Process(target=run_streamlit, daemon=True)
-    streamlit_process.start()
-
     MyApp().run()
- 
-
-

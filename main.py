@@ -9,6 +9,7 @@ import atexit
 import subprocess
 import time
 import base64
+import sys
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
@@ -28,11 +29,15 @@ import win32gui
 # ZROBIC BACKUP 
 # bo rozwalimy ludziom systemy jak cos sie ... xD 
 
-sites_to_block = ["facebook.com", "instagram.com", "linkedin.com",  "youtube.com"] 
+sites_to_block = ["facebook.com", "instagram.com", "linkedin.com",  "youtube.com", "pornhub.com", "tiktok.com"] 
 hosts_path = r"C:\Windows\System32\drivers\etc\hosts"  # Windows
 # hosts_path = "/etc/hosts"  # MacOS/Linux
 redirect_ip = "127.0.0.1"
 
+def resource_path(relative_path):
+    """Zwraca ścieżkę do zasobu dla pliku .exe"""
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 def get_active_window_title(sites):
     while True:
@@ -42,8 +47,8 @@ def get_active_window_title(sites):
 
         for site in sites:
             if strip_site(site) in active_window:
-                os.system("start http://localhost:8501")
-            time.sleep(0.05)  
+                os.system("start https://matela7.github.io/")
+            time.sleep(0.1)  
         #time.sleep(1)  
 
 def strip_site(site):
@@ -143,7 +148,7 @@ class FirstScreen(Screen):
         layout.add_widget(text)  # Główny napis
 
         horizontal_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.5))
-        image = Image(source='korki.gif', size_hint=(0.5, 1))
+        image = Image(source=resource_path('korki.gif'), size_hint=(0.5, 1))
         horizontal_layout.add_widget(image)  # Obrazek animowany
 
         layout.add_widget(horizontal_layout)
@@ -282,7 +287,7 @@ class MyApp(App):
         return screen_manager
     
     def play_sound_on_startup(self):
-        sound = SoundLoader.load('corgi_bark.mp3')
+        sound = SoundLoader.load(resource_path('corgi_bark.mp3'))
         if sound:
             sound.play()   
 
@@ -312,7 +317,6 @@ def close_processes():
 #atexit.register(close_processes)
 
 if __name__ == '__main__':
-    streamlit_process = multiprocessing.Process(target=run_streamlit, daemon=True)
-    streamlit_process.start()
+    multiprocessing.freeze_support()
 
     MyApp().run()
