@@ -9,6 +9,7 @@ import atexit
 import subprocess
 import time
 import base64
+import sys
 from kivy.app import App
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.image import Image
@@ -23,18 +24,20 @@ from kivy.graphics import Color, Rectangle  # Import do rysowania tła
 from kivy.graphics import Color, Ellipse  # Import do rysowania kółka
 from kivy.core.audio import SoundLoader
 from functools import partial
-from kivymd.uix.textfield import MDTextField  # Import MDTextField
-from kivymd.app import MDApp  # Importujemy MDApp do aplikacji KivyMD
 import win32gui
 # TO DO:
 # ZROBIC BACKUP 
 # bo rozwalimy ludziom systemy jak cos sie ... xD 
 
-sites_to_block = ["facebook.com", "instagram.com", "linkedin.com",  "youtube.com"] 
+sites_to_block = ["facebook.com", "instagram.com", "linkedin.com",  "youtube.com", "pornhub.com", "tiktok.com"] 
 hosts_path = r"C:\Windows\System32\drivers\etc\hosts"  # Windows
 # hosts_path = "/etc/hosts"  # MacOS/Linux
 redirect_ip = "127.0.0.1"
 
+def resource_path(relative_path):
+    """Zwraca ścieżkę do zasobu dla pliku .exe"""
+    base_path = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base_path, relative_path)
 
 def get_active_window_title(sites):
     while True:
@@ -44,14 +47,13 @@ def get_active_window_title(sites):
 
         for site in sites:
             if strip_site(site) in active_window:
-                os.system("start http://localhost:8501")
-            time.sleep(0.05)  
+                os.system("start https://matela7.github.io/")
+            time.sleep(0.1)  
         #time.sleep(1)  
 
 def strip_site(site):
     return site.replace("http://", "").replace("https://", "").replace("www.", "").replace(".com", "").split("/")[0].lower()
-def run_get_active_window_title(sites):
-    get_active_window_title(sites)
+# Funkcja wyświetlająca popup z błędem
 def error_popup(number):
     if number == 0:
         popup1 = Popup(title='ERROR CORGI IS ANGRY',
@@ -146,7 +148,7 @@ class FirstScreen(Screen):
         layout.add_widget(text)  # Główny napis
 
         horizontal_layout = BoxLayout(orientation='horizontal', size_hint=(1, 0.5))
-        image = Image(source='korki.gif', size_hint=(0.5, 1))
+        image = Image(source=resource_path('korki.gif'), size_hint=(0.5, 1))
         horizontal_layout.add_widget(image)  # Obrazek animowany
 
         layout.add_widget(horizontal_layout)
@@ -243,71 +245,38 @@ class FirstScreen(Screen):
 
 
 # Druga strona
-from kivymd.uix.button import MDIconButton  # Importujemy przyciski z ikonami
-
 class SecondScreen(Screen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        layout = BoxLayout(orientation='vertical', padding=50, spacing=5)
+        layout = BoxLayout(orientation='vertical')
 
-        with layout.canvas.before:
-            Color(0.216, 0.933, 0.992, 1)
-            self.rect = Rectangle(size=self.size, pos=self.pos)
-            layout.bind(size=self._update_rect, pos=self._update_rect)
-
-        text = Label(text="CUSTOM BLOCKLIST", font_size='33sp', size_hint=(1, 0.2))
+        text = Label(text="Manage Websites", font_size='30sp', size_hint=(1, 0.1))
         layout.add_widget(text)
 
-        scrollview = ScrollView(size_hint=(1, 1))
+        scrollview = ScrollView(size_hint=(1, 0.8))
+        grid = GridLayout(cols=1, size_hint_y=None)
+        grid.bind(minimum_height=grid.setter('height'))
+
+        for site in sites_to_block:
+            lbl = Label(text=site, font_size='20sp', size_hint_y=None, height=40)
+            grid.add_widget(lbl)
+
+        scrollview.add_widget(grid)
         layout.add_widget(scrollview)
 
-        self.gridlayout = GridLayout(cols=2, spacing=10, size_hint_y=None)
-        self.gridlayout.bind(minimum_height=self.gridlayout.setter('height'))
-        scrollview.add_widget(self.gridlayout)
-
-        # Dodanie stron na starcie
-        self.update_site_list()
-
-        # Przycisk dodawania
-        add_button = Button(text="ADD SITE", size_hint=(1, 0.2))
-        add_button.bind(on_press=self.add_site)
-        layout.add_widget(add_button)
-
-        # Przycisk powrotu
-        prev_button = Button(text="Back to First Screen", size_hint=(1, 0.2))
-        prev_button.bind(on_press=self.on_prev_button_press)
-        layout.add_widget(prev_button)
+        button_prev = Button(text="Previous", font_size='20sp', size_hint=(1, 0.1))
+        button_prev.bind(on_press=self.on_prev_button_press)
+        layout.add_widget(button_prev)
 
         self.add_widget(layout)
-
-    def _update_rect(self, instance, value):
-        self.rect.pos = instance.pos
-        self.rect.size = instance.size
-
-    def update_site_list(self):
-        self.gridlayout.clear_widgets()
-        for site in sites_to_block:
-            text_input = MDTextField(text=site, font_size='15sp', size_hint=(0.8, None), height=40)
-            self.gridlayout.add_widget(text_input)
-
-            # Przycisk usuwania
-            remove_button = MDIconButton(icon="delete", size_hint=(0.2, None), on_press=partial(self.remove_site, site))
-            self.gridlayout.add_widget(remove_button)
-
-    def add_site(self, instance):
-        sites_to_block.append("")
-        self.update_site_list()
-
-    def remove_site(self, site, instance):
-        if site in sites_to_block:
-            sites_to_block.remove(site)
-        self.update_site_list()
-
+        
     def on_prev_button_press(self, instance):
         self.manager.current = 'first'
 
-
-class MyApp(MDApp):  # Używamy MDApp zamiast App
+# Klasa główna, aplikacja
+class MyApp(App):
+    icon = "icon.png" #or icon.ico
+    title = "CORGI FOCUS"
     def build(self):
         self.play_sound_on_startup()
         global main_iterator
@@ -318,7 +287,7 @@ class MyApp(MDApp):  # Używamy MDApp zamiast App
         return screen_manager
     
     def play_sound_on_startup(self):
-        sound = SoundLoader.load('corgi_bark.mp3')
+        sound = SoundLoader.load(resource_path('corgi_bark.mp3'))
         if sound:
             sound.play()   
 
@@ -348,4 +317,6 @@ def close_processes():
 #atexit.register(close_processes)
 
 if __name__ == '__main__':
+    multiprocessing.freeze_support()
+
     MyApp().run()
