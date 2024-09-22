@@ -1,8 +1,14 @@
 from kivy.config import Config
-Config.set('graphics', 'width', '480')
-Config.set('graphics', 'height', '700')
-Config.set('graphics', 'resizable', False)  # Jeśli nie chcesz, żeby okno było skalowalne
+Config.set('graphics', 'width', '1920')
+Config.set('graphics', 'height', '1080')
+Config.set('graphics', 'resizable', True)  # Nie pozwala na zmianę rozmiaru
 
+# Włącz tryb pełnoekranowy
+Config.set('graphics', 'fullscreen', 'auto')  # Umożliwia automatyczne dopasowanie
+
+# Możesz ustawić maksymalne rozmiary
+Config.set('graphics', 'max_width', '1920')
+Config.set('graphics', 'max_height', '1080')
 import threading
 import os
 import atexit
@@ -56,6 +62,7 @@ from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.gridlayout import MDGridLayout
 from kivy.core.window import Window
+from kivy.uix.video import Video
 
 import win32gui
 
@@ -214,9 +221,10 @@ class FirstScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # Dodaj obrazek jako tło
-        with self.canvas.before:
-            self.bg_image = Rectangle(source=resource_path('wall.jpg'), size=Window.size, pos=self.pos)
+
+        self.bg_video = Video(source=resource_path('video.mp4'), state='play', options={'eos': 'loop'})
+        self.bg_video.volume = 0.0
+        self.add_widget(self.bg_video)
 
         self.blocked = False  # Flaga do sprawdzania, czy strony są zablokowane
         layout = MDBoxLayout(orientation='vertical', padding=50, spacing=5)
@@ -273,10 +281,10 @@ class FirstScreen(MDScreen):
 class SecondScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Dodaj obrazek jako tło
-        with self.canvas.before:
-            self.bg_image = Rectangle(source=resource_path('wall.jpg'), size=Window.size, pos=self.pos)
 
+        self.bg_video = Video(source=resource_path('video3.mp4'), state='play', options={'eos': 'loop'})
+        self.bg_video.volume = 0.0
+        self.add_widget(self.bg_video)
         self.layout = MDBoxLayout(orientation='vertical')
 
         self.text = MDLabel(
@@ -395,10 +403,10 @@ class ThirdScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-        # Dodaj obrazek jako tło
-        with self.canvas.before:
-            self.bg_image = Rectangle(source=resource_path('wall.jpg'), size=Window.size, pos=self.pos)
 
+        self.bg_video = Video(source=resource_path('video2.mp4'), state='play', options={'eos': 'loop'})
+        self.bg_video.volume = 0.0
+        self.add_widget(self.bg_video)
 
         # Główny layout
         layout = MDBoxLayout(orientation='vertical', padding=50, spacing=5)
