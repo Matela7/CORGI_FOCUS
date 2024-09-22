@@ -55,7 +55,7 @@ from kivymd.uix.label import MDLabel
 from kivymd.uix.boxlayout import MDBoxLayout
 from kivymd.uix.button import MDRaisedButton
 from kivymd.uix.gridlayout import MDGridLayout
-
+from kivy.core.window import Window
 
 import win32gui
 
@@ -116,7 +116,6 @@ def block_sites(hosts_path, sites_to_block, redirect_ip):
                 for site in sites_to_block:
                     if site not in hosts:
                         file.write(redirect_ip + " " + site + "\n")
-            Snackbar(text="Sites Blocked").open()
         except PermissionError:
             error_popup(0)
     else:
@@ -142,7 +141,6 @@ def unblock_sites(hosts_path, sites_to_block, redirect_ip):
                     if not any(site in line for site in sites_to_block):
                         file.write(line)
                 file.truncate()
-            Snackbar(text="Sites Unblocked").open()
         except PermissionError:
             error_popup(1)
 
@@ -215,8 +213,10 @@ class PomodoroIterator:
 class FirstScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-#3B3B98
-        self.md_bg_color = get_color_from_hex("#3B3B98")  # Ustaw czarne tło (możesz zmienić kolor)
+
+        # Dodaj obrazek jako tło
+        with self.canvas.before:
+            self.bg_image = Rectangle(source=resource_path('wall.jpg'), size=Window.size, pos=self.pos)
 
         self.blocked = False  # Flaga do sprawdzania, czy strony są zablokowane
         layout = MDBoxLayout(orientation='vertical', padding=50, spacing=5)
@@ -230,18 +230,18 @@ class FirstScreen(MDScreen):
         buttons_layout = MDBoxLayout(orientation='horizontal', size_hint=(1, 0.2))
         
         # Przyciski
-        self.button_block = MDRaisedButton(text="BLOCK", font_size='15sp', size_hint=(0.15, 0.25))
+        self.button_block = MDRaisedButton(text="BLOCK", font_size='15sp', size_hint=(0.15, 0.25), md_bg_color=(get_color_from_hex("#2D2D2D")))
         self.button_block.bind(on_press=self.on_block_button_press)
         buttons_layout.add_widget(self.button_block)
 
         button_change = MDRaisedButton(
             text="Block mode" if not main_iterator.main_iterator else "Popup mode",
-            font_size='15sp', size_hint=(0.15, 0.25)
+            font_size='15sp', size_hint=(0.15, 0.25), md_bg_color=(get_color_from_hex("#2D2D2D"))
         )
         button_change.bind(on_press=self.on_change_button_press)
         buttons_layout.add_widget(button_change)
 
-        button_next = MDRaisedButton(text="Next", font_size='15sp', size_hint=(0.15, 0.25))
+        button_next = MDRaisedButton(text="Next", font_size='15sp', size_hint=(0.15, 0.25), md_bg_color=(get_color_from_hex("#2D2D2D")))
         button_next.bind(on_press=self.on_next_button_press)
         buttons_layout.add_widget(button_next)
         
@@ -273,8 +273,9 @@ class FirstScreen(MDScreen):
 class SecondScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        self.md_bg_color = get_color_from_hex("#3B3B98")  # Ustaw kolor tła
+        # Dodaj obrazek jako tło
+        with self.canvas.before:
+            self.bg_image = Rectangle(source=resource_path('wall.jpg'), size=Window.size, pos=self.pos)
 
         self.layout = MDBoxLayout(orientation='vertical')
 
@@ -328,7 +329,8 @@ class SecondScreen(MDScreen):
         self.add_button = MDRaisedButton(
             text="Add Website",
             size_hint=(None, None),  # Brak automatycznego rozciągania
-            size=(200, 50)  # Ustawienie stałego rozmiaru
+            size=(200, 50),  # Ustawienie stałego rozmiaru
+            md_bg_color=(get_color_from_hex("#2D2D2D"))
         )
         self.add_button.bind(on_press=self.on_add_button_press)
         button_layout.add_widget(self.add_button)
@@ -337,7 +339,8 @@ class SecondScreen(MDScreen):
         self.button_prev = MDRaisedButton(
             text="Next", 
             size_hint=(None, None),  # Brak automatycznego rozciągania
-            size=(200, 50)  # Ustawienie stałego rozmiaru
+            size=(200, 50),  # Ustawienie stałego rozmiaru
+            md_bg_color=(get_color_from_hex("#2D2D2D"))
         )
         self.button_prev.bind(on_press=self.on_prev_button_press)
         button_layout.add_widget(self.button_prev)
@@ -391,8 +394,11 @@ class SecondScreen(MDScreen):
 class ThirdScreen(MDScreen):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Ustawienie koloru tła
-        self.md_bg_color = get_color_from_hex("#3B3B98")
+
+        # Dodaj obrazek jako tło
+        with self.canvas.before:
+            self.bg_image = Rectangle(source=resource_path('wall.jpg'), size=Window.size, pos=self.pos)
+
 
         # Główny layout
         layout = MDBoxLayout(orientation='vertical', padding=50, spacing=5)
@@ -416,19 +422,19 @@ class ThirdScreen(MDScreen):
         button_layout.bind(minimum_width=button_layout.setter('width'))  # Dostosowanie szerokości do liczby przycisków
 
                 # Przycisk Start
-        self.start_button = MDRaisedButton(text="Start", on_release=self.start_timer)
+        self.start_button = MDRaisedButton(text="Start", on_release=self.start_timer, md_bg_color=(get_color_from_hex("#2D2D2D")))
         button_layout.add_widget(self.start_button)
         
         # Przycisk Pause
-        self.pause_button = MDRaisedButton(text="Pause", on_release=self.pause_timer)
+        self.pause_button = MDRaisedButton(text="Pause", on_release=self.pause_timer, md_bg_color=(get_color_from_hex("#2D2D2D")))
         button_layout.add_widget(self.pause_button)
         
         # Przycisk Reset
-        self.reset_button = MDRaisedButton(text="Reset/Break", on_release=self.reset_timer)
+        self.reset_button = MDRaisedButton(text="Reset/Break", on_release=self.reset_timer, md_bg_color=(get_color_from_hex("#2D2D2D")))
         button_layout.add_widget(self.reset_button)
 
         # Przycisk Next
-        self.next_button = MDRaisedButton(text="Next", on_release=self.on_next_button_press)
+        self.next_button = MDRaisedButton(text="Next", on_release=self.on_next_button_press, md_bg_color=(get_color_from_hex("#2D2D2D")))
         button_layout.add_widget(self.next_button)
 
         # Dodanie przycisków do layoutu
@@ -536,6 +542,8 @@ class MyApp(MDApp):
         if sound:
             sound.play()
 
+    def on_stop(self):
+        unblock_sites(hosts_path, sites_to_block, redirect_ip)
 
 if __name__ == "__main__":
     MyApp().run()
