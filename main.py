@@ -1,10 +1,10 @@
 from kivy.config import Config
-Config.set('graphics', 'width', '1920')
-Config.set('graphics', 'height', '1080')
-Config.set('graphics', 'resizable', True)  # Nie pozwala na zmianę rozmiaru
+Config.set('graphics', 'width', '1280')
+Config.set('graphics', 'height', '720')
+Config.set('graphics', 'resizable', False)  # Nie pozwala na zmianę rozmiaru
 
 # Włącz tryb pełnoekranowy
-Config.set('graphics', 'fullscreen', 'auto')  # Umożliwia automatyczne dopasowanie
+#Config.set('graphics', 'fullscreen', 'auto')  # Umożliwia automatyczne dopasowanie
 
 # Możesz ustawić maksymalne rozmiary
 Config.set('graphics', 'max_width', '1920')
